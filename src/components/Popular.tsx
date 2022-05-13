@@ -5,19 +5,28 @@ import { Splide, SplideSlide } from '@splidejs/react-splide';
 import '@splidejs/react-splide/css';
 
 const Popular: React.FC = () => {
-  const [popular, setPopular] = useState<any[]>([]);
-
-  const getPopular = async () => {
-    const api = await axios.get(
-      `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9`
-    );
-    const data = api.data;
-    setPopular(data.recipes);
-  };
+  const [popular, setPopular] = useState<any>([]);
 
   useEffect(() => {
     getPopular();
   }, []);
+
+  const getPopular = async () => {
+    const check = localStorage.getItem('popular');
+
+    if (check) {
+      setPopular(JSON.parse(check));
+    } else {
+      const api = await fetch(
+        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9`
+      );
+      const data = await api.json();
+
+      localStorage.setItem('popular', JSON.stringify(data.recipes));
+      setPopular(data.recipes);
+      console.log(data.recipes);
+    }
+  };
 
   return (
     <div>
@@ -31,7 +40,7 @@ const Popular: React.FC = () => {
             drag: 'free',
             gap: '5rem',
           }}>
-          {popular.map(recipe => {
+          {popular.map((recipe: any) => {
             return (
               <SplideSlide key={recipe.id}>
                 <Card>
